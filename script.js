@@ -33,6 +33,11 @@ const setEndButton = document.getElementById('setEndButton');
 const resetButton = document.getElementById('resetButton');
 const statusMessage = document.getElementById('statusMessage');
 
+// --- Animation Speed Control ---
+// Removed setTimeout for maximum speed. If it completes too fast, 
+// we can add a simple setTimeout without requestAnimationFrame for controlled delay.
+// const ANIMATION_SPEED_MS = 20; 
+
 // --- Node Class Definition ---
 // Represents a single cell in the grid
 class Node {
@@ -181,7 +186,7 @@ function aStarStep() {
         if (currentNode === endNode) {
             console.log('Path Found!');
             algorithmRunning = false;
-            statusMessage.textContent = 'Path found! 🎉';
+            statusMessage.textContent = 'Path found! 🎉 Click "Reset Grid" to try again.';
             reconstructPath(currentNode);
             drawGrid(); // Final draw to show complete path
             return; // Stop the animation loop
@@ -230,9 +235,9 @@ function aStarStep() {
 
     // Redraw grid for visualization
     drawGrid();
-    // Request next frame if algorithm is still running
+    // Request next frame if algorithm is still running (running as fast as browser allows)
     if (algorithmRunning) {
-        requestAnimationFrame(aStarStep);
+        requestAnimationFrame(aStarStep); 
     }
 }
 
@@ -263,7 +268,10 @@ function getMousePos(canvas, evt) {
 
 // Handle mouse clicks on the canvas
 canvas.addEventListener('mousedown', (e) => {
-    if (algorithmRunning) return; // Don't allow changes while algorithm is running
+    if (algorithmRunning) {
+        statusMessage.textContent = 'Cannot modify grid while search is running!';
+        return; // Don't allow changes while algorithm is running
+    }
 
     const mousePos = getMousePos(canvas, e);
     const col = Math.floor(mousePos.x / CELL_SIZE);
@@ -277,28 +285,31 @@ canvas.addEventListener('mousedown', (e) => {
             if (clickedNode !== startNode && clickedNode !== endNode) {
                 clickedNode.isWall = !clickedNode.isWall; // Toggle wall
                 drawGrid(); // Redraw immediately
+                statusMessage.textContent = 'Wall toggled. Click "Start Search" when ready!';
+            } else {
+                statusMessage.textContent = "Cannot place a wall on Start or End nodes!";
             }
         } else if (currentMode === MODE_SET_START) {
             if (clickedNode !== endNode && !clickedNode.isWall) {
                 // Clear previous start node's wall status if it became a wall
-                if (startNode) startNode.isWall = false;
+                if (startNode) startNode.isWall = false; // Ensure old start isn't a persistent wall
                 startNode = clickedNode;
-                // Reinitialize A* related arrays if start/end change to ensure clean state
+                statusMessage.textContent = `Start node set at (${col}, ${row}).`;
                 resetAStarState();
                 drawGrid();
             } else {
-                statusMessage.textContent = "Start node cannot be an end node or a wall!";
+                statusMessage.textContent = "Start node cannot be an end node or an existing wall!";
             }
         } else if (currentMode === MODE_SET_END) {
             if (clickedNode !== startNode && !clickedNode.isWall) {
                 // Clear previous end node's wall status if it became a wall
-                if (endNode) endNode.isWall = false;
+                if (endNode) endNode.isWall = false; // Ensure old end isn't a persistent wall
                 endNode = clickedNode;
-                // Reinitialize A* related arrays if start/end change to ensure clean state
+                statusMessage.textContent = `End node set at (${col}, ${row}).`;
                 resetAStarState();
                 drawGrid();
             } else {
-                statusMessage.textContent = "End node cannot be a start node or a wall!";
+                statusMessage.textContent = "End node cannot be a start node or an existing wall!";
             }
         }
     }
@@ -315,7 +326,9 @@ startButton.addEventListener('click', () => {
         resetAStarState();
         aStarStep(); // Start the animation loop
     } else if (noSolution) {
-        statusMessage.textContent = 'No solution was found. Reset the grid to try again.';
+        statusMessage.textContent = 'No solution was found previously. Reset the grid to try again.';
+    } else if (algorithmRunning) {
+        statusMessage.textContent = 'Search is already running!';
     }
 });
 
@@ -323,8 +336,10 @@ startButton.addEventListener('click', () => {
 setStartButton.addEventListener('click', () => {
     if (!algorithmRunning) {
         currentMode = MODE_SET_START;
-        statusMessage.textContent = 'Click on an empty cell to set the Start Node.';
+        statusMessage.textContent = 'MODE: Set Start Node. Click on an empty cell on the grid.';
         // Add a visual indicator for active mode if desired
+    } else {
+        statusMessage.textContent = 'Cannot change mode while search is running!';
     }
 });
 
@@ -332,8 +347,10 @@ setStartButton.addEventListener('click', () => {
 setEndButton.addEventListener('click', () => {
     if (!algorithmRunning) {
         currentMode = MODE_SET_END;
-        statusMessage.textContent = 'Click on an empty cell to set the End Node.';
+        statusMessage.textContent = 'MODE: Set End Node. Click on an empty cell on the grid.';
         // Add a visual indicator for active mode if desired
+    } else {
+        statusMessage.textContent = 'Cannot change mode while search is running!';
     }
 });
 
@@ -342,7 +359,7 @@ resetButton.addEventListener('click', () => {
     initializeGrid();
     drawGrid();
     currentMode = MODE_DRAW_WALL; // Reset mode to drawing walls
-    statusMessage.textContent = 'Grid reset! Click to draw walls or set new start/end points.';
+    statusMessage.textContent = 'Grid reset! MODE: Draw Walls. Click on cells to draw walls or use Set buttons.';
 });
 
 // Helper to reset A* specific arrays when start/end/walls change
@@ -363,9 +380,14 @@ function resetAStarState() {
             node.previous = undefined;
         }
     }
+    // Ensure start node has g=0 and is in openSet for a fresh start
+    startNode.g = 0;
+    startNode.f = heuristic(startNode, endNode);
+    openSet = [startNode];
 }
 
 
 // --- Initial Setup ---
 initializeGrid();
 drawGrid(); // Initial draw of the empty grid
+statusMessage.textContent = 'Welcome! Click on cells to draw walls or use Set buttons.';
