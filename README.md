@@ -36,3 +36,7 @@ It always prioritises exploring the node with the lowest `f` score, making it "i
 This project is an exciting step in my software engineering learning journey. It allowed me to dive deeper into algorithms, visual programming with JavaScript canvas, and creating interactive user experiences. I'm thrilled to share this glimpse into AI concepts and continue building more fascinating applications!
 
 Feel free to interact with the visualiser, fork the repository, and explore the code!
+
+UPDATE: NEEDS A FIX
+- upon clicking either 'set start' or 'set end', it does not exit out of function(s) which prohibits ability to click on empty cells and create walls
+- Start Search seems to either lag or 'get stuck'
