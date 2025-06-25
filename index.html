@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A* Pathfinding Visualiser</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono:wght@400&display=swap');
+
+        /* Global Body Styling with custom fonts */
+        body {
+            font-family: 'Roboto Mono', monospace; /* Techy font */
+            background-color: #1a1a2e; /* Deep space background */
+            color: #e0e0e0; /* Light gray text */
+            margin: 0;
+            padding: 1.5rem;
+            box-sizing: border-box;
+            overflow-x: hidden; /* Prevent horizontal scroll on smaller screens */
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif; /* Futuristic heading font */
+        }
+        
+        /* Specific coloring for win/lose/tie in script.js */
+        .win { color: #2ecc71; text-shadow: 0 0 10px rgba(46, 204, 113, 0.7); } /* Brighter green for win */
+        .lose { color: #e74c3c; text-shadow: 0 0 10px rgba(231, 76, 60, 0.7); } /* Brighter red for loss */
+        .tie { color: #f1c40f; text-shadow: 0 0 10px rgba(241, 196, 15, 0.7); } /* Brighter yellow for tie */
+
+        /* Canvas styling - cannot be fully done with Tailwind for dynamic sizing */
+        canvas {
+            display: block; /* Remove extra space below canvas */
+            background-color: #0d1620; /* Very dark background for grid */
+            border-radius: 8px; /* Slightly rounded canvas inside container */
+        }
+
+        /* Responsive canvas sizing */
+        @media (max-width: 768px) {
+            canvas {
+                width: 100%; /* Make canvas responsive within its container */
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body class="flex justify-center items-center min-h-screen">
+    <div class="container bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl shadow-2xl text-center max-w-2xl w-full border border-gray-700 backdrop-blur-md">
+        <h1 class="text-5xl font-bold mb-4 text-cyan-400 drop-shadow-lg">A* Pathfinding Visualiser 🚀</h1>
+        <p class="text-lg text-gray-300 mb-8 leading-relaxed">
+            Click cells to draw walls. Use buttons to set start/end points.
+            Watch the A* algorithm find the shortest path!
+        </p>
+
+        <div class="controls flex flex-wrap justify-center gap-4 mb-8">
+            <button id="startButton" class="control-button bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 transform hover:scale-105">Start Search</button>
+            <button id="setStartButton" class="control-button bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 transform hover:scale-105">Set Start</button>
+            <button id="setEndButton" class="control-button bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 transform hover:scale-105">Set End</button>
+            <button id="resetButton" class="control-button bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 transform hover:scale-105">Reset Grid</button>
+        </div>
+
+        <div class="canvas-container bg-gray-900 border-2 border-cyan-500 rounded-lg overflow-hidden mb-6 shadow-xl flex justify-center items-center">
+            <canvas id="pathfindingCanvas"></canvas>
+        </div>
+
+        <div class="status-message text-lg text-gray-400 font-mono italic min-h-6" id="statusMessage">
+            Click 'Start Search' when ready!
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
